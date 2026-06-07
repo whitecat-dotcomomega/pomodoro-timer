@@ -1,130 +1,320 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pomodoro Timer</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <style>
-        body {
-            font-family: sans-serif;
-            text-align: center;
-            margin-top: 50px;
-        }
+<title>Pomodoro Timer β</title>
 
-        #timer {
-            font-size: 60px;
-            margin: 30px;
-        }
+<style>
 
-        button {
-            font-size: 20px;
-            padding: 10px 20px;
-            margin: 5px;
-        }
-    </style>
+body{
+    font-family:sans-serif;
+    text-align:center;
+    margin:20px;
+    max-width:600px;
+    margin-left:auto;
+    margin-right:auto;
+}
+
+h1{
+    margin-bottom:30px;
+}
+
+#timer{
+    font-size:72px;
+    margin:30px 0;
+    font-weight:bold;
+}
+
+input{
+    width:70%;
+    padding:12px;
+    font-size:18px;
+}
+
+button{
+    padding:12px 20px;
+    margin:5px;
+    font-size:18px;
+    cursor:pointer;
+}
+
+ul{
+    padding:0;
+}
+
+li{
+    list-style:none;
+    margin:10px 0;
+}
+
+.task-item{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+}
+
+#counter{
+    font-size:24px;
+    margin-top:20px;
+}
+
+@media (max-width:600px){
+
+    #timer{
+        font-size:56px;
+    }
+
+    input{
+        width:90%;
+    }
+
+    button{
+        width:90%;
+        max-width:300px;
+    }
+}
+
+</style>
 </head>
+
 <body>
 
-    <h1>ポモドーロタイマー</h1>
-    
-    <h2>タスク管理</h2>
-    <input type="text" id="taskInput" placeholder="タスクを入力">
-    <button onclick="addTask()">追加</button>
-    <ul id="taskList"></ul>
-    
-    <div id="timer">25:00</div>
+<h1>ポモドーロタイマー β</h1>
 
-    <button onclick="startTimer()">開始</button>
-    <button onclick="stopTimer()">停止</button>
-    <button onclick="resetTimer()">リセット</button>
+<h2>タスク管理</h2>
 
-    <script>
+<input
+    type="text"
+    id="taskInput"
+    placeholder="タスクを入力">
 
-        let totalSeconds = 25 * 60;
-        let timer;
-        let running = false;
+<br><br>
 
-        function updateDisplay() {
-            let minutes = Math.floor(totalSeconds / 60);
-            let seconds = totalSeconds % 60;
+<button onclick="addTask()">タスク追加</button>
 
-            document.getElementById("timer").textContent =
-                String(minutes).padStart(2, '0') + ":" +
-                String(seconds).padStart(2, '0');
-        }
+<ul id="taskList"></ul>
 
-        function startTimer() {
+<hr>
 
-            if (running) return;
+<div id="timer">25:00</div>
 
-            running = true;
+<button onclick="startTimer()">開始</button>
+<button onclick="stopTimer()">停止</button>
+<button onclick="resetTimer()">リセット</button>
 
-            timer = setInterval(() => {
+<div id="counter">
+今日のポモドーロ数:
+<span id="pomodoroCount">0</span>
+</div>
 
-                if (totalSeconds > 0) {
+<script>
 
-                    totalSeconds--;
-                    updateDisplay();
+let totalSeconds = 25 * 60;
+let timer = null;
+let running = false;
 
-                } else {
+/* ---------- ポモドーロ回数 ---------- */
 
-                    clearInterval(timer);
-                    running = false;
+let pomodoroCount =
+    Number(localStorage.getItem("pomodoroCount")) || 0;
 
-                    alert("25分経過しました！");
+document.getElementById("pomodoroCount").textContent =
+    pomodoroCount;
 
-                }
+/* ---------- タイマー表示 ---------- */
 
-            }, 1000);
-        }
+function updateDisplay(){
 
-        function stopTimer() {
-            clearInterval(timer);
-            running = false;
-        }
+    let minutes =
+        Math.floor(totalSeconds / 60);
 
-        function resetTimer() {
-            clearInterval(timer);
-            running = false;
+    let seconds =
+        totalSeconds % 60;
 
-            totalSeconds = 25 * 60;
+    document.getElementById("timer").textContent =
+        String(minutes).padStart(2,"0")
+        + ":"
+        + String(seconds).padStart(2,"0");
+}
 
+/* ---------- 開始 ---------- */
+
+function startTimer(){
+
+    if(running) return;
+
+    running = true;
+
+    timer = setInterval(function(){
+
+        if(totalSeconds > 0){
+
+            totalSeconds--;
             updateDisplay();
+
         }
-        
-function addTask() {
+        else{
 
-    let input = document.getElementById("taskInput");
+            clearInterval(timer);
 
-    let taskName = input.value.trim();
+            running = false;
 
-    if (taskName === "") {
-        alert("タスク名を入力してください");
+            pomodoroCount++;
+
+            document.getElementById("pomodoroCount")
+                .textContent = pomodoroCount;
+
+            localStorage.setItem(
+                "pomodoroCount",
+                pomodoroCount
+            );
+
+            alert("25分経過しました！");
+        }
+
+    },1000);
+}
+
+/* ---------- 停止 ---------- */
+
+function stopTimer(){
+
+    clearInterval(timer);
+
+    running = false;
+}
+
+/* ---------- リセット ---------- */
+
+function resetTimer(){
+
+    clearInterval(timer);
+
+    running = false;
+
+    totalSeconds = 25 * 60;
+
+    updateDisplay();
+}
+
+/* ---------- タスク保存 ---------- */
+
+function saveTasks(){
+
+    let tasks = [];
+
+    document
+        .querySelectorAll(".task-text")
+        .forEach(function(task){
+
+            tasks.push(task.textContent);
+
+        });
+
+    localStorage.setItem(
+        "tasks",
+        JSON.stringify(tasks)
+    );
+}
+
+/* ---------- タスク生成 ---------- */
+
+function createTask(taskName){
+
+    let li =
+        document.createElement("li");
+
+    let wrapper =
+        document.createElement("div");
+
+    wrapper.className =
+        "task-item";
+
+    let span =
+        document.createElement("span");
+
+    span.className =
+        "task-text";
+
+    span.textContent =
+        taskName;
+
+    let deleteButton =
+        document.createElement("button");
+
+    deleteButton.textContent =
+        "削除";
+
+    deleteButton.onclick =
+        function(){
+
+            li.remove();
+
+            saveTasks();
+        };
+
+    wrapper.appendChild(span);
+
+    wrapper.appendChild(deleteButton);
+
+    li.appendChild(wrapper);
+
+    document
+        .getElementById("taskList")
+        .appendChild(li);
+}
+
+/* ---------- タスク追加 ---------- */
+
+function addTask(){
+
+    let input =
+        document.getElementById("taskInput");
+
+    let taskName =
+        input.value.trim();
+
+    if(taskName === ""){
+
+        alert(
+            "タスク名を入力してください"
+        );
+
         return;
     }
 
-    let li = document.createElement("li");
+    createTask(taskName);
 
-    let deleteButton = document.createElement("button");
+    saveTasks();
 
-    deleteButton.textContent = "削除";
-
-    deleteButton.onclick = function() {
-        li.remove();
-    };
-
-    li.textContent = taskName + " ";
-
-    li.appendChild(deleteButton);
-
-    document.getElementById("taskList").appendChild(li);
     input.value = "";
 }
-        
-        updateDisplay();
 
-    </script>
+/* ---------- タスク復元 ---------- */
+
+function loadTasks(){
+
+    let tasks =
+        JSON.parse(
+            localStorage.getItem("tasks")
+        ) || [];
+
+    tasks.forEach(function(task){
+
+        createTask(task);
+
+    });
+}
+
+/* ---------- 初期化 ---------- */
+
+loadTasks();
+updateDisplay();
+
+</script>
 
 </body>
 </html>
