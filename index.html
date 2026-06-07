@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro Timer</title>
+
+    <style>
+        body {
+            font-family: sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+
+        #timer {
+            font-size: 60px;
+            margin: 30px;
+        }
+
+        button {
+            font-size: 20px;
+            padding: 10px 20px;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>ポモドーロタイマー</h1>
+
+    <div id="timer">25:00</div>
+
+    <button onclick="startTimer()">開始</button>
+    <button onclick="stopTimer()">停止</button>
+    <button onclick="resetTimer()">リセット</button>
+
+    <script>
+
+        let totalSeconds = 25 * 60;
+        let timer;
+        let running = false;
+
+        function updateDisplay() {
+            let minutes = Math.floor(totalSeconds / 60);
+            let seconds = totalSeconds % 60;
+
+            document.getElementById("timer").textContent =
+                String(minutes).padStart(2, '0') + ":" +
+                String(seconds).padStart(2, '0');
+        }
+
+        function startTimer() {
+
+            if (running) return;
+
+            running = true;
+
+            timer = setInterval(() => {
+
+                if (totalSeconds > 0) {
+
+                    totalSeconds--;
+                    updateDisplay();
+
+                } else {
+
+                    clearInterval(timer);
+                    running = false;
+
+                    alert("25分経過しました！");
+
+                }
+
+            }, 1000);
+        }
+
+        function stopTimer() {
+            clearInterval(timer);
+            running = false;
+        }
+
+        function resetTimer() {
+            clearInterval(timer);
+            running = false;
+
+            totalSeconds = 25 * 60;
+
+            updateDisplay();
+        }
+
+        updateDisplay();
+
+    </script>
+
+</body>
+</html>
