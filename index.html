@@ -92,7 +92,27 @@
 
             updateDisplay();
         }
+        
+function addTask() {
 
+    let input = document.getElementById("taskInput");
+
+    let taskName = input.value.trim();
+
+    if (taskName === "") {
+        alert("タスク名を入力してください");
+        return;
+    }
+
+    let li = document.createElement("li");
+
+    li.textContent = taskName;
+
+    document.getElementById("taskList").appendChild(li);
+
+    input.value = "";
+}
+        
         updateDisplay();
 
     </script>
